@@ -1,0 +1,47 @@
+[distutils]
+index-servers = ['pypi', 'testpypi']
+
+[pypi]
+repository = "https://upload.pypi.org/legacy/"
+username = "Danferno"
+
+[testpypi]
+repository = "https://test.pypi.org/legacy/"
+username = "Danferno"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "tabledetect"
+authors = [{name = "Jesse Wursten", email = "jessaius+tabledetect@hotmail.com"}]
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version", "description"]
+readme = "README.md"
+requires-python = ">=3.0"
+dependencies = [
+    'matplotlib>=3.2.2',
+    'numpy>=1.18.5,<1.24.0',
+    'opencv-python>=4.1.1',
+    'Pillow>=7.1.2',
+    'PyYAML>=5.3.1',
+    'requests>=2.23.0',
+    'scipy>=1.4.1',
+    'tqdm>=4.41.0',
+    'protobuf<4.21.3',
+    'pandas>=1.1.4',
+    'seaborn>=0.11.0',
+    'ipython',
+    'psutil',
+    'thop'
+]
+
+[project.urls]
+Source = "https://github.com/Danferno/table-detect"
+
+[project.optional-dependencies]
+dev = [
+    "flit", "pytest"
+]

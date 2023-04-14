@@ -3,3 +3,5 @@
 *.pt
 temp.py
 test.png
+dist/
+tests/temp/

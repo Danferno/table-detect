@@ -9,3 +9,4 @@ else:
     # Clone
     command = 'git clone https://github.com/WongKinYiu/yolov7.git yolov7'; subprocess.call(command, shell=True)
 
+# Add train_custom.py.backup if applicable
