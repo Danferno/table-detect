@@ -44,6 +44,7 @@ def detect_table(path_input=PATH_EXAMPLES, path_cropped_output=os.path.join(PATH
     logging.info('Detecting objects in your source files')
     if os.path.exists(PATH_OUT):
         shutil.rmtree(PATH_OUT)
+    os.makedirs(PATH_OUT)
     command = f'{PATH_PYTHON} "{PATH_SCRIPT_DETECT}"' \
                 f' --weights {PATH_WEIGHTS}' \
                 f' --conf {threshold_confidence}' \
