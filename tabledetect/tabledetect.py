@@ -31,7 +31,7 @@ if not os.path.exists(PATH_WEIGHTS):
 
 
 # Detect tables
-def detect_table(path_input=PATH_EXAMPLES, path_cropped_output=os.path.join(PATH_OUT, 'cropped'), device=None, threshold_confidence=0.5, model_image_size=992, trace='--no-trace', image_format='.png', save_bounding_box_file=True, verbosity=logging.INFO):
+def detect_table(path_input=PATH_EXAMPLES, path_output=os.path.join(PATH_OUT, 'examples_out'), device=None, threshold_confidence=0.5, model_image_size=992, trace='--no-trace', image_format='.png', save_bounding_box_file=True, verbosity=logging.INFO):
     # Parse options
     logging.basicConfig(level=verbosity)
     logging.debug('Checking if torch is properly installed')
@@ -42,9 +42,10 @@ def detect_table(path_input=PATH_EXAMPLES, path_cropped_output=os.path.join(PATH
 
     # Detect
     logging.info('Detecting objects in your source files')
-    if os.path.exists(PATH_OUT):
-        shutil.rmtree(PATH_OUT)
-    os.makedirs(PATH_OUT)
+    pathMlOutput = os.path.join(path_output, 'out')
+    if os.path.exists(pathMlOutput):
+        shutil.rmtree(pathMlOutput)
+    os.makedirs(path_output, exist_ok=True)
     command = f'{PATH_PYTHON} "{PATH_SCRIPT_DETECT}"' \
                 f' --weights {PATH_WEIGHTS}' \
                 f' --conf {threshold_confidence}' \
@@ -53,14 +54,15 @@ def detect_table(path_input=PATH_EXAMPLES, path_cropped_output=os.path.join(PATH
                 f' --save-txt --save-conf' \
                 f' --project out --name table-detect' \
                 f' {trace}'
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, cwd=path_output)
 
     # Extract bounding boxes
     logging.info('Extracting bounding box information from the YOLO files')
-    bbox_lists_per_file = [getBoundingBoxesPerFile(annotationfile.path) for annotationfile in os.scandir(os.path.join(PATH_OUT, 'table-detect', 'labels'))]
+    bbox_lists_per_file = [getBoundingBoxesPerFile(annotationfile.path) for annotationfile in os.scandir(os.path.join(PATH_OUT, 'out', 'table-detect', 'labels'))]
 
     # Crop images
     logging.info('Extracting cropped images and saving single bounding box json file')
+    path_cropped_output = os.path.join(path_output, 'cropped')
     extractCroppedImages(bbox_lists_per_file_list=bbox_lists_per_file, outDir=path_cropped_output, imageFormat=image_format, imageDir=path_input, saveBoundingBoxFile=save_bounding_box_file)
 
 

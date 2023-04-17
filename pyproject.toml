@@ -1,4 +1,5 @@
-# flit build 
+# flit install --python "C:\virtualenvs\testpackages-venv\Scripts\python.exe"
+# flit publish 
 [distutils]
 index-servers = ['pypi', 'testpypi']
 
