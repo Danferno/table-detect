@@ -9,6 +9,7 @@ import logging; logging.basicConfig(level=logging.INFO)
 # Check if torch and torchvision installed
 try:
     import torch
+    import torchvision
 except ModuleNotFoundError:
     raise ModuleNotFoundError('pytorch module not found, go to https://pytorch.org/get-started/locally/ to install the correct version')
 
