@@ -19,7 +19,7 @@ PATH_WEIGHTS = os.path.join(PATH_PACKAGE, 'resources', 'tabledetect.pt')
 PATH_WEIGHTS_URL = 'https://www.dropbox.com/s/k1iuhwk2k62uifb/tabledetect.pt?dl=1'
 PATH_EXAMPLES = os.path.join(PATH_PACKAGE, 'resources', 'examples')
 PATH_PYTHON = sys.executable
-PATH_OUT = Path(PATH_PACKAGE).parent / 'out'
+PATH_OUT = os.path.join(PATH_PACKAGE, 'resources', 'examples_out')
 
 PATH_ML_MODEL = os.path.join(PATH_PACKAGE, 'yolov7-main')
 PATH_SCRIPT_DETECT = os.path.join(PATH_PACKAGE, 'yolov7-main', 'detect_codamo.py')
