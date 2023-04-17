@@ -1,7 +1,9 @@
 /out
-*.pyc
+*.pyc*
 *.pt
 temp.py
 test.png
 dist/
 tests/temp/
+.venv/
+yolov7-main/

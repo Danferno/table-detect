@@ -3,7 +3,8 @@ import os, subprocess, sys, shutil
 from pathlib import Path
 from tabledetect.helpers.yolo_to_boundingbox import getBoundingBoxesPerFile
 from tabledetect.helpers.boundigbox_to_cropped_image import extractCroppedImages
-import logging
+from tabledetect.helpers.download import downloadRepo, downloadWeights
+import logging; logging.basicConfig(level=logging.INFO)
 
 # Check if torch and torchvision installed
 try:
@@ -13,14 +14,20 @@ except ModuleNotFoundError:
 
 # Constants
 PATH_PACKAGE = os.path.dirname(os.path.realpath(__file__))
-PATH_WEIGHTS = os.path.join(PATH_PACKAGE, 'resources', 'best.pt')
+PATH_WEIGHTS = os.path.join(PATH_PACKAGE, 'resources', 'tabledetect.pt')
+PATH_WEIGHTS_URL = 'https://www.dropbox.com/s/k1iuhwk2k62uifb/tabledetect.pt?dl=1'
 PATH_EXAMPLES = os.path.join(PATH_PACKAGE, 'resources', 'examples')
 PATH_PYTHON = sys.executable
 PATH_OUT = Path(PATH_PACKAGE).parent / 'out'
 
-PATH_SCRIPT_DETECT = os.path.join(PATH_PACKAGE, 'yolov7', 'detect_codamo.py')
+PATH_ML_MODEL = os.path.join(PATH_PACKAGE, 'yolov7-main')
+PATH_SCRIPT_DETECT = os.path.join(PATH_PACKAGE, 'yolov7-main', 'detect_codamo.py')
 if not os.path.exists(PATH_SCRIPT_DETECT):
-    PATH_SCRIPT_DETECT = PATH_SCRIPT_DETECT.replace('_codamo', '')
+    downloadRepo(url='https://github.com/Danferno/yolov7/archive/master.zip', destination=PATH_PACKAGE)
+
+if not os.path.exists(PATH_WEIGHTS):
+    downloadWeights(url=PATH_WEIGHTS_URL, destination=PATH_WEIGHTS)
+
 
 # Detect tables
 def detect_table(path_input=PATH_EXAMPLES, path_cropped_output=os.path.join(PATH_OUT, 'cropped'), device=None, threshold_confidence=0.5, model_image_size=992, trace='--no-trace', image_format='.png', save_bounding_box_file=True, verbosity=logging.INFO):
@@ -31,7 +38,7 @@ def detect_table(path_input=PATH_EXAMPLES, path_cropped_output=os.path.join(PATH
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if not image_format.startswith('.'):
         image_format = f'.{image_format}'
-    
+
     # Detect
     logging.info('Detecting objects in your source files')
     if os.path.exists(PATH_OUT):
@@ -44,7 +51,7 @@ def detect_table(path_input=PATH_EXAMPLES, path_cropped_output=os.path.join(PATH
                 f' --save-txt --save-conf' \
                 f' --project out --name table-detect' \
                 f' {trace}'
-    subprocess.run(command)
+    subprocess.run(command, check=True)
 
     # Extract bounding boxes
     logging.info('Extracting bounding box information from the YOLO files')

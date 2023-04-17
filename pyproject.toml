@@ -43,5 +43,5 @@ Source = "https://github.com/Danferno/table-detect"
 
 [project.optional-dependencies]
 dev = [
-    "flit", "pytest"
+    "flit", "pytest", "keyring"
 ]
