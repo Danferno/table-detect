@@ -1,4 +1,11 @@
-/out
+# LFS: 
+# cd  F:\ml-parsing-project\table-detect-package
+# If already comitted: 
+#   java -jar "C:\Program Files\Git LFS\bfg-1.14.0.jar" --delete-files tablestructure.pth "F:\ml-parsing-project\table-detect-package\.git"
+#   java -jar "C:\Program Files\Git LFS\bfg-1.14.0.jar" --delete-files tabledetect.pt "F:\ml-parsing-project\table-detect-package\.git"
+# git lfs track "*.pt"
+# git lfs track "*.pth"
+examples_out/
 *.pyc*
 *.pt
 temp.py
@@ -7,3 +14,4 @@ dist/
 tests/temp/
 .venv/
 yolov7-main/
+table-transformer-main/

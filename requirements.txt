@@ -1,5 +1,5 @@
 # Usage: pip install -r requirements.txt
-# Base ----------------------------------------
+# Yolo
 matplotlib>=3.2.2
 numpy>=1.18.5,<1.24.0
 opencv-python>=4.1.1
@@ -9,10 +9,21 @@ requests>=2.23.0
 scipy>=1.4.1
 tqdm>=4.41.0
 protobuf<4.21.3
-
-# Plotting ------------------------------------
 pandas>=1.1.4
 seaborn>=0.11.0
+
+# table-transformer
+scikit-learn==1.2.1
+Cython==0.29.33
+matplotlib==3.7.0
+pycocotools==2.0.6
+editdistance==0.6.2
+scikit-image==0.20.0
+PyMuPDF
+
+# Self
+gputil
+deskew
 
 # Export --------------------------------------
 # coremltools>=4.1  # CoreML export

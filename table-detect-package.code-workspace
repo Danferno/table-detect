@@ -5,7 +5,14 @@
 		},
 		{
 			"path": "../../datatog/code/common"
+		},
+		{
+			"path": "../table-transformer"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.analysis.extraPaths": [
+			"tabledetect/table-transformer-main/src"
+		]
+	}
 }
