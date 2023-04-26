@@ -8,6 +8,7 @@
 examples_out/
 *.pyc*
 *.pt
+*.pth
 temp.py
 test.png
 dist/
