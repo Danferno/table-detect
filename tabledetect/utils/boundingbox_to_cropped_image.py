@@ -12,7 +12,7 @@ def yoloBboxToPillowBbox(yoloBbox, image_width, image_height):
     
     return (left, top, right, bottom)
     
-def extractCroppedImages(bbox_lists_per_file_list, outDir, imageFormat, imageDir, saveBoundingBoxFile):
+def extractCroppedImages(bbox_lists_per_file_list, outDir, imageFormat, imageDir):
     # Create folders
     uniqueLabelIds = set(bbox['labelId'] for item in bbox_lists_per_file_list for _, bbox_list in item.items() for bbox in bbox_list)
     os.makedirs(os.path.join(outDir), exist_ok=True)
@@ -34,10 +34,8 @@ def extractCroppedImages(bbox_lists_per_file_list, outDir, imageFormat, imageDir
                 cropped = inputImage.crop(pillowBbox)
                 cropped.save(pathOut)
 
-                if saveBoundingBoxFile:
-                    boundingBoxInfos.append({'sourceName': filename, 'labelId': bbox['labelId'], 'table_num': i, 'pillowBbox': pillowBbox})
+                boundingBoxInfos.append({'sourceName': filename, 'labelId': bbox['labelId'], 'table_num': i, 'pillowBbox': pillowBbox})
 
-    if saveBoundingBoxFile:
-        pathBoundingBoxFile = os.path.join(outDir, 'boundingBoxData.json')
-        with open(pathBoundingBoxFile, 'w') as boundingBoxFile:
-            json.dump(boundingBoxInfos, boundingBoxFile)
+    pathBoundingBoxFile = os.path.join(outDir, 'boundingBoxData.json')
+    with open(pathBoundingBoxFile, 'w') as boundingBoxFile:
+        json.dump(boundingBoxInfos, boundingBoxFile)

@@ -51,7 +51,7 @@ PATH_OUT_PARSE = os.path.join(PATH_OUT, 'out', 'table-structure')
 # Detection
 def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, path_weights=PATH_WEIGHTS_DETECT,
                  device='', threshold_confidence=0.5, model_image_size=992, trace='--no-trace',
-                 image_format='.jpg', save_bounding_box_file=True, save_visual_output=True, max_overlap_threshold=0.2, verbosity=logging.INFO):
+                 image_format='.jpg', save_visual_output=True, save_table_crops=False, max_overlap_threshold=0.2, verbosity=logging.INFO):
     # Options | Logging
     logger.setLevel(verbosity)
 
@@ -95,9 +95,10 @@ def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, p
     bbox_lists_per_file = [getBoundingBoxesPerFile(annotationfile.path) for annotationfile in os.scandir(os.path.join(path_output, 'out', 'table-detect', 'labels'))]
 
     # Crop images
-    logger.info('Extracting cropped images and saving single bounding box json file')
-    path_cropped_output = os.path.join(path_output, 'out', 'table-detect', 'cropped')
-    extractCroppedImages(bbox_lists_per_file_list=bbox_lists_per_file, outDir=path_cropped_output, imageFormat=image_format, imageDir=path_input, saveBoundingBoxFile=save_bounding_box_file)
+    if save_table_crops:
+        logger.info('Extracting cropped images and saving single bounding box json file')
+        path_cropped_output = os.path.join(path_output, 'out', 'table-detect', 'cropped')
+        extractCroppedImages(bbox_lists_per_file_list=bbox_lists_per_file, outDir=path_cropped_output, imageFormat=image_format, imageDir=path_input)
 
 def parse_table(path_input=PATH_EXAMPLES_PARSE, path_weights=PATH_WEIGHTS_PARSE, path_config=PATH_CONFIG_PARSE, path_output=PATH_OUT_PARSE, deskew=True, padding=20, device=None, image_format='.png', verbosity=logging.INFO):
     # Options
