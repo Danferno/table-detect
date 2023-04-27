@@ -57,7 +57,14 @@ def pdfToImages(path_input, path_output, image_format='.jpg', sample_size_pdfs=1
         results = Parallel(n_jobs=n_workers, backend="loky", verbose=verbosity)(delayed(splitPdf)(pdfPath, path_output) for pdfPath in pdfPaths)
         logger.info(f'Splitting {len(results)} PDFs took {time.time()-start:.0f} seconds. {results.count(False)} PDFs raised an error.')
 
-def sampleImages(path_labels, path_images, path_output, sample_size=6000, inverse_scaling_factor=5, share_sample_empty=0.05, verbosity=logging.INFO):
+def sampleImages(path_labels, path_images, path_output, percentile_of_scores=15, sample_size=6000, inverse_scaling_factor=5, share_sample_empty=0.05, verbosity=logging.INFO):
+    '''
+    percentile_of_scores: Percentile of confidence scores to take, rounded down.
+        Some models output multiple confidence scores per image, this option determines
+        which score to use. Set to 0 to use the lowest. By default we take the 15th percentile,
+        this excludes the very lowest confidence scores while still basing the sampling probability
+        on a relatively bad prediction within the image.
+    '''
     # Options | Paths
     path_images = Path(path_images)
     path_output = Path(path_output)
@@ -76,8 +83,10 @@ def sampleImages(path_labels, path_images, path_output, sample_size=6000, invers
     for labelFilePath in tqdm(labelFilePaths, desc='Calculating sampling probabilities'):                                # labelFilePath = next(labelFilePaths)
         try:
             with open(labelFilePath.path, 'r') as labelFile:    
-                lowestConfidence = min([float(line.split(' ')[-1].strip('\n')) for line in labelFile])
-            notEmpty_samplingProbability[labelFilePath.name] = confidenceScore_to_samplingProbability(lowestConfidence)
+                confidenceScores = [float(line.split(' ')[-1].strip('\n')) for line in labelFile]
+                relevantConfidenceScore = np.percentile(confidenceScores, q=percentile_of_scores, method='inverted_cdf')
+
+            notEmpty_samplingProbability[labelFilePath.name] = confidenceScore_to_samplingProbability(relevantConfidenceScore)
         except UnicodeDecodeError:
             pass
     
@@ -134,7 +143,7 @@ def sampleImages(path_labels, path_images, path_output, sample_size=6000, invers
     # Sample | Collect images
     imageFormat = os.path.splitext(next(os.scandir(path_images)))[-1]
     os.makedirs(path_output, exist_ok=True)
-    for filename in tqdm(sample, desc='Copying files from path_iamges to path_output'):
+    for filename in tqdm(sample, desc='Copying files from path_images to path_output'):
         filename_full = f'{filename}{imageFormat}'
         _ = shutil.copyfile(src=path_images / filename_full,
                         dst=path_output / filename_full)
