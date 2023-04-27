@@ -57,7 +57,7 @@ def pdfToImages(path_input, path_output, image_format='.jpg', sample_size_pdfs=1
         results = Parallel(n_jobs=n_workers, backend="loky", verbose=verbosity)(delayed(splitPdf)(pdfPath, path_output) for pdfPath in pdfPaths)
         logger.info(f'Splitting {len(results)} PDFs took {time.time()-start:.0f} seconds. {results.count(False)} PDFs raised an error.')
 
-def sampleImages(path_labels, path_images, path_output, sample_size=100, inverse_scaling_factor=5, share_sample_empty=0.05, verbosity=logging.INFO):
+def sampleImages(path_labels, path_images, path_output, sample_size=6000, inverse_scaling_factor=5, share_sample_empty=0.05, verbosity=logging.INFO):
     # Options | Paths
     path_images = Path(path_images)
     path_output = Path(path_output)

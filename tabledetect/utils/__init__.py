@@ -1,1 +1,1 @@
-from prepData import pdfToImages, sampleImages
+from .prepData import pdfToImages, sampleImages
