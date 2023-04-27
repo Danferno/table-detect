@@ -51,7 +51,7 @@ PATH_OUT_PARSE = os.path.join(PATH_OUT, 'out', 'table-structure')
 # Detection
 def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, path_weights=PATH_WEIGHTS_DETECT,
                  device='', threshold_confidence=0.5, model_image_size=992, trace='--no-trace',
-                 image_format='.png', save_bounding_box_file=True, verbosity=logging.INFO):
+                 image_format='.jpg', save_bounding_box_file=True, verbosity=logging.INFO):
     # Parse options
     logger.setLevel(verbosity)
     if not image_format.startswith('.'):
