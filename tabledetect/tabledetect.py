@@ -29,7 +29,10 @@ if (find_spec('torch') is None) or (find_spec('torchvision') is None):
     raise ModuleNotFoundError(f'pytorch modules not found, go to https://pytorch.org/get-started/locally/ to install the correct version\nOur best guess: {suggestedPipCommand}')
 
 # Constants
-PATH_PACKAGE = os.path.dirname(os.path.realpath(__file__))
+try:
+    PATH_PACKAGE = os.path.dirname(os.path.realpath(__file__)) 
+except:
+    PATH_PACKAGE = Path(os.path.dirname(os.path.realpath(__name__))) / 'tabledetect'
 PATH_PYTHON = sys.executable
 PATH_OUT = os.path.join(PATH_PACKAGE, 'resources', 'examples_out')
 
@@ -46,7 +49,7 @@ PATH_EXAMPLES_PARSE = os.path.join(PATH_PACKAGE, 'resources', 'examples_parse')
 PATH_ML_MODEL_PARSE = os.path.join(PATH_PACKAGE, 'table-transformer-main')
 PATH_SCRIPT_PARSE = os.path.join(PATH_PACKAGE, 'table-transformer-main', 'src')
 PATH_CONFIG_PARSE = os.path.join(PATH_SCRIPT_PARSE, 'structure_config.json')
-PATH_OUT_PARSE = os.path.join(PATH_OUT, 'out', 'table-structure')
+PATH_OUT_PARSE = os.path.join(PATH_OUT, 'out', 'table-parse')
 
 # Detection
 def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, path_weights=PATH_WEIGHTS_DETECT,
@@ -100,8 +103,13 @@ def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, p
         path_cropped_output = os.path.join(path_output, 'out', 'table-detect', 'cropped')
         extractCroppedImages(bbox_lists_per_file_list=bbox_lists_per_file, outDir=path_cropped_output, imageFormat=image_format, imageDir=path_input)
 
-def parse_table(path_input=PATH_EXAMPLES_PARSE, path_weights=PATH_WEIGHTS_PARSE, path_config=PATH_CONFIG_PARSE, path_output=PATH_OUT_PARSE, deskew=True, padding=20, device=None, image_format='.png', verbosity=logging.INFO):
-    # Options
+def parse_table(path_input=PATH_EXAMPLES_PARSE, path_output=PATH_OUT_PARSE,
+        save_bboxes=True, save_visual_output=True, deskew=True, padding=20,
+        device=None, image_format='.jpg',
+        path_weights=PATH_WEIGHTS_PARSE, path_config=PATH_CONFIG_PARSE, verbosity=logging.INFO):
+    # Options | Paths
+    path_output = Path(path_output)
+
     # Options | Verbosity
     logger.setLevel(verbosity)
 
@@ -118,6 +126,7 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_weights=PATH_WEIGHTS_PARSE,
     if not device:
         import torch.cuda
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        logger.info(f'Using device: {device}')
 
     # Options | Create output folder
     os.makedirs(path_output, exist_ok=True)
@@ -137,9 +146,13 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_weights=PATH_WEIGHTS_PARSE,
     for dirEntry in tqdm(inputPaths, desc='Parsing table images'):      # dirEntry = inputPaths[0]
         # Parse | Correct skew
         image = Image.open(dirEntry.path)
+        filename = os.path.splitext(dirEntry.name)[0]
         if deskew:
             skewAngle = determine_skew(np.array(image.convert('L')), min_deviation=0.25)
-            if skewAngle != 0.0: image = image.rotate(skewAngle, expand=True, fillcolor='white')
+            if skewAngle != 0.0: 
+                with open(path_output / 'skewAngles.txt', 'w') as file:
+                    _ = file.write(f'{filename} {skewAngle:.2f}\n')
+                image = image.rotate(skewAngle, expand=True, fillcolor='white')
         
         # Parse | Pad
         if padding:
@@ -148,7 +161,14 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_weights=PATH_WEIGHTS_PARSE,
 
         # Parse | Parse
         image = image.convert('RGB')
-        extractedTable = TableStructurer.recognize(img=image, tokens=[], out_cells=True, out_objects=True)
-        for key, val in extractedTable.items():
-            output_result(key, val, args=args, img=image, img_file=dirEntry.name, img_format=image_format)
+        extractedTable = TableStructurer.recognize(img=image, tokens=[], out_cells=save_visual_output, out_objects=save_bboxes)
+        if save_bboxes:
+            with open(path_output / f'{filename}.json', 'w') as file:
+                json.dump(extractedTable['objects'], file)
+        if save_visual_output:
+            for key, val in extractedTable.items():
+                output_result(key, val, args=args, img=image, img_file=dirEntry.name, img_format=image_format)
 
+
+if __name__ == '__main__':
+    parse_table()
