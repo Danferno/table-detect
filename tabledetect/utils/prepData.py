@@ -19,6 +19,10 @@ if TEST:
     path_images = Path(r"F:\ml-parsing-project\data\detect_activelearning1_jpg\all")
     path_output = r"F:\ml-parsing-project\data\detect_activelearning1_jpg\selected"
 
+    path_images = Path(r"F:\ml-parsing-project\data\parse_activelearning1_jpg\all")
+    path_labels = Path(r"F:\ml-parsing-project\data\parse_activelearning1_jpg\detected")
+    path_output = r"F:\ml-parsing-project\data\parse_activelearning1_jpg\selected"
+
 def pdfToImages(path_input, path_output, image_format='.jpg', sample_size_pdfs=100, dpi=150, keep_transparency=False, n_workers=-1, verbosity=logging.INFO):
     # Options
     # Options | Image format dot
@@ -57,7 +61,7 @@ def pdfToImages(path_input, path_output, image_format='.jpg', sample_size_pdfs=1
         results = Parallel(n_jobs=n_workers, backend="loky", verbose=verbosity)(delayed(splitPdf)(pdfPath, path_output) for pdfPath in pdfPaths)
         logger.info(f'Splitting {len(results)} PDFs took {time.time()-start:.0f} seconds. {results.count(False)} PDFs raised an error.')
 
-def sampleImages(path_labels, path_images, path_output, percentile_of_scores=15, sample_size=6000, inverse_scaling_factor=5, share_sample_empty=0.05, verbosity=logging.INFO):
+def sampleImages(path_labels, path_images, path_output, fileformat_scores='yolo', percentile_of_scores=15, sample_size=6000, inverse_scaling_factor=5, share_sample_empty=0.05, verbosity=logging.INFO):
     '''
     percentile_of_scores: Percentile of confidence scores to take, rounded down.
         Some models output multiple confidence scores per image, this option determines
@@ -67,6 +71,7 @@ def sampleImages(path_labels, path_images, path_output, percentile_of_scores=15,
     '''
     # Options | Paths
     path_images = Path(path_images)
+    path_labels = Path(path_labels)
     path_output = Path(path_output)
 
     # Options | Sampling probability function
@@ -78,17 +83,36 @@ def sampleImages(path_labels, path_images, path_output, percentile_of_scores=15,
     
 
     # Sample | notEmpty | Calculate sampling probability per file based on confidence score
-    labelFilePaths = list(os.scandir(path_labels))
     notEmpty_samplingProbability = {}
-    for labelFilePath in tqdm(labelFilePaths, desc='Calculating sampling probabilities'):                                # labelFilePath = next(labelFilePaths)
-        try:
-            with open(labelFilePath.path, 'r') as labelFile:    
-                confidenceScores = [float(line.split(' ')[-1].strip('\n')) for line in labelFile]
-                relevantConfidenceScore = np.percentile(confidenceScores, q=percentile_of_scores, method='inverted_cdf')
 
-            notEmpty_samplingProbability[labelFilePath.name] = confidenceScore_to_samplingProbability(relevantConfidenceScore)
-        except UnicodeDecodeError:
-            pass
+    if fileformat_scores == 'yolo':
+        labelFilePaths = list(os.scandir(path_labels))
+        for labelFilePath in tqdm(labelFilePaths, desc='Calculating sampling probabilities'):                                # labelFilePath = next(labelFilePaths)
+            try:
+                with open(labelFilePath.path, 'r') as labelFile:    
+                    confidenceScores = [float(line.split(' ')[-1].strip('\n')) for line in labelFile]
+                    relevantConfidenceScore = np.percentile(confidenceScores, q=percentile_of_scores, method='inverted_cdf')
+
+                notEmpty_samplingProbability[labelFilePath.name] = confidenceScore_to_samplingProbability(relevantConfidenceScore)
+            except UnicodeDecodeError:
+                pass
+    elif fileformat_scores == 'tableparser':
+        labelFilePaths = list(os.scandir(path_labels))
+        for labelFilePath in tqdm(labelFilePaths, desc='Calculating sampling probabilities'):                                # labelFilePath = labelFilePaths[0]
+            try:
+                with open(labelFilePath.path, 'r') as labelFile:    
+                    confidenceScoreDicts = json.load(labelFile)
+                confidenceScores = [confidenceScoreDict['score'] for confidenceScoreDict in confidenceScoreDicts]
+                try:
+                    relevantConfidenceScore = np.percentile(confidenceScores, q=percentile_of_scores, method='inverted_cdf')
+                except IndexError:
+                    pass
+
+                notEmpty_samplingProbability[labelFilePath.name] = confidenceScore_to_samplingProbability(relevantConfidenceScore)
+            except (UnicodeDecodeError, json.decoder.JSONDecodeError):
+                pass
+    else:
+        raise Exception(f'File format of scores {fileformat_scores} not supported. Did you mean "yolo" or "tableparser"?')
     
     # Sample | notEmpty | Collect sample
     sample_size_notEmpty = math.ceil(sample_size * (1-share_sample_empty))
