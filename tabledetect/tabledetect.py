@@ -51,11 +51,16 @@ PATH_OUT_PARSE = os.path.join(PATH_OUT, 'out', 'table-structure')
 # Detection
 def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, path_weights=PATH_WEIGHTS_DETECT,
                  device='', threshold_confidence=0.5, model_image_size=992, trace='--no-trace',
-                 image_format='.jpg', save_bounding_box_file=True, verbosity=logging.INFO):
-    # Parse options
+                 image_format='.jpg', save_bounding_box_file=True, save_annotated_images=True, max_overlap_threshold=0.2, verbosity=logging.INFO):
+    # Options | Logging
     logger.setLevel(verbosity)
+
+    # Options | Image format
     if not image_format.startswith('.'):
         image_format = f'.{image_format}'
+
+    # Options | Save annotated images
+        saveVisualOutput = '' if save_annotated_images else '--nosave'
 
     # Download weights and scripts
     if not os.path.exists(path_weights):
@@ -79,8 +84,9 @@ def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, p
                 f' --source {path_input}' \
                 f' --save-txt --save-conf' \
                 f' --project out --name table-detect' \
+                f' --iou-thres {max_overlap_threshold}' \
                 f' {device}' \
-                f' {trace}'
+                f' {trace} {saveVisualOutput}'
     subprocess.run(command, check=True, cwd=path_output)
     logger.info(f'path_output: {path_output}')
 
