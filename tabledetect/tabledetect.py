@@ -150,7 +150,7 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_output=PATH_OUT_PARSE,
         if deskew:
             skewAngle = determine_skew(np.array(image.convert('L')), min_deviation=0.25)
             if skewAngle != 0.0: 
-                with open(path_output / 'skewAngles.txt', 'w') as file:
+                with open(path_output / 'skewAngles.txt', 'a') as file:
                     _ = file.write(f'{filename} {skewAngle:.2f}\n')
                 image = image.rotate(skewAngle, expand=True, fillcolor='white')
         
