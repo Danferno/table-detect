@@ -2,10 +2,10 @@
 import os, subprocess, sys, shutil
 from pathlib import Path
 from importlib.util import find_spec
-from tabledetect.helpers.yolo_to_boundingbox import getBoundingBoxesPerFile
-from tabledetect.helpers.boundingbox_to_cropped_image import extractCroppedImages
-from tabledetect.helpers.download import downloadRepo, downloadWeights
-from tabledetect.helpers.args_classes import StructureArgs
+from tabledetect.utils.yolo_to_boundingbox import getBoundingBoxesPerFile
+from tabledetect.utils.boundingbox_to_cropped_image import extractCroppedImages
+from tabledetect.utils.download import downloadRepo, downloadWeights
+from tabledetect.utils.args_classes import StructureArgs
 
 from tqdm import tqdm
 from PIL import Image, ImageOps

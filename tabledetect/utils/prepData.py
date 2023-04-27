@@ -19,7 +19,7 @@ if TEST:
     path_images = Path(r"F:\ml-parsing-project\data\detect_activelearning1_jpg\all")
     path_output = r"F:\ml-parsing-project\data\detect_activelearning1_jpg\selected"
 
-def pdfToImages(path_input, path_output, image_format='.jpg', sample_size=100, dpi=150, keep_transparency=False, n_workers=-1, verbosity=logging.INFO):
+def pdfToImages(path_input, path_output, image_format='.jpg', sample_size_pdfs=100, dpi=150, keep_transparency=False, n_workers=-1, verbosity=logging.INFO):
     # Options
     # Options | Image format dot
     if not image_format.startswith('.'):
@@ -32,7 +32,7 @@ def pdfToImages(path_input, path_output, image_format='.jpg', sample_size=100, d
     logger = logging.getLogger(__name__); logger.setLevel(verbosity)
 
     # Draw sample
-    pdfPaths = random.sample([pdfPath.path for pdfPath in os.scandir(path_input)], k=sample_size)
+    pdfPaths = random.sample([pdfPath.path for pdfPath in os.scandir(path_input)], k=sample_size_pdfs)
 
     # Split
     def splitPdf(pdfPath, path_output):
