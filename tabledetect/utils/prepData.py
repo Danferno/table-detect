@@ -105,10 +105,9 @@ def sampleImages(path_labels, path_images, path_output, fileformat_scores='yolo'
                 confidenceScores = [confidenceScoreDict['score'] for confidenceScoreDict in confidenceScoreDicts]
                 try:
                     relevantConfidenceScore = np.percentile(confidenceScores, q=percentile_of_scores, method='inverted_cdf')
+                    notEmpty_samplingProbability[labelFilePath.name] = confidenceScore_to_samplingProbability(relevantConfidenceScore)
                 except IndexError:
-                    pass
-
-                notEmpty_samplingProbability[labelFilePath.name] = confidenceScore_to_samplingProbability(relevantConfidenceScore)
+                    pass               
             except (UnicodeDecodeError, json.decoder.JSONDecodeError):
                 pass
     else:
