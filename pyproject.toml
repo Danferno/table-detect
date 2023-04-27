@@ -36,6 +36,14 @@ dependencies = [
     'protobuf<4.21.3',
     'pandas>=1.1.4',
     'seaborn>=0.11.0',
+    'scikit-learn>=1.2.1',
+    'Cython>=0.29.33',
+    'pycocotools>=2.0.6',
+    'editdistance>=0.6.2',
+    'scikit-image>=0.20.0',
+    'gputil',
+    'deskew',
+    'pymupdf'
 #    'ipython',
 #    'psutil',
 #    'thop'
@@ -47,4 +55,7 @@ Source = "https://github.com/Danferno/table-detect"
 [project.optional-dependencies]
 dev = [
     "flit", "pytest", "keyring"
+]
+parallel = [
+    "joblib"
 ]

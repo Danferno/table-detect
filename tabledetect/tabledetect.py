@@ -3,7 +3,7 @@ import os, subprocess, sys, shutil
 from pathlib import Path
 from importlib.util import find_spec
 from tabledetect.helpers.yolo_to_boundingbox import getBoundingBoxesPerFile
-from tabledetect.helpers.boundigbox_to_cropped_image import extractCroppedImages
+from tabledetect.helpers.boundingbox_to_cropped_image import extractCroppedImages
 from tabledetect.helpers.download import downloadRepo, downloadWeights
 from tabledetect.helpers.args_classes import StructureArgs
 
@@ -48,11 +48,10 @@ PATH_SCRIPT_PARSE = os.path.join(PATH_PACKAGE, 'table-transformer-main', 'src')
 PATH_CONFIG_PARSE = os.path.join(PATH_SCRIPT_PARSE, 'structure_config.json')
 PATH_OUT_PARSE = os.path.join(PATH_OUT, 'out', 'table-structure')
 
-# Detect tables
+# Detection
 def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, path_weights=PATH_WEIGHTS_DETECT,
                  device='', threshold_confidence=0.5, model_image_size=992, trace='--no-trace',
-                 image_format='.png', save_bounding_box_file=True, verbosity=logging.INFO,
-                 deskew=True):
+                 image_format='.png', save_bounding_box_file=True, verbosity=logging.INFO):
     # Parse options
     logger.setLevel(verbosity)
     if not image_format.startswith('.'):
