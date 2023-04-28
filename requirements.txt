@@ -25,6 +25,7 @@ PyMuPDF
 # Self
 gputil
 deskew
+lxml
 
 # Export --------------------------------------
 # coremltools>=4.1  # CoreML export

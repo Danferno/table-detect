@@ -41,12 +41,7 @@ dependencies = [
     'pycocotools>=2.0.6',
     'editdistance>=0.6.2',
     'scikit-image>=0.20.0',
-    'gputil',
-    'deskew',
-    'pymupdf'
-#    'ipython',
-#    'psutil',
-#    'thop'
+    'gputil', 'deskew','pymupdf', 'lxml'
 ]
 
 [project.urls]
