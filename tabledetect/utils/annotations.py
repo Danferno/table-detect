@@ -120,7 +120,7 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type,
 
     # Annotation function
     def annotateImage(imagePath):
-        img = Image.open(imagePath)
+        img = Image.open(imagePath).convert('RGB')
         filename = os.path.splitext(os.path.basename(imagePath))[0]
         imageExtension = os.path.splitext(os.path.basename(imagePath))[-1]
         annotations = __annotation_to_pilBox(sourcePath=path_labels / filename, labelFormat=labelFormat, targetImage=img, classMap=classMap, colorMap=colorMap)
@@ -156,11 +156,15 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type,
 
 if __name__ == '__main__':
     # annotation_type = 'tableparse'
-    annotation_type = 'tabledetect'
-    path_images = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images"
-    path_labels = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\labels"
-    path_output = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images_annotated"
-    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output)
+    # annotation_type = 'tabledetect'
+    # path_images = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images"
+    # path_labels = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\labels"
+    # path_output = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images_annotated"
+    annotation_type = 'tableparse'
+    path_images = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_will"
+    path_labels = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\labels_will"
+    path_output = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_annotated_will"
+    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1)
 
             
 
