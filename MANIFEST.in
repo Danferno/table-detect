@@ -1,2 +1,6 @@
 include LICENSE
 include README.md
+
+recursive exclude */yolov7-main *
+exclude resources/tablestructure.pth
+exclude resources/tabledetect.pt

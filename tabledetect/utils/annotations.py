@@ -7,6 +7,7 @@ from lxml import etree
 from math import ceil
 import time
 import logging
+from typing import Literal
 
 
 TEST = False
@@ -93,7 +94,7 @@ def __visualise(image, annotations, min_width):
 
 
 # Functions
-def visualise_annotation(path_images, path_labels, path_output, annotation_type:str('tabledetect'|'tableparse'), classMap=None,
+def visualise_annotation(path_images, path_labels, path_output, annotation_type:Literal['tabledetect', 'tableparse'], classMap=None,
                          split_annotation_types=None, min_width=800,
                          n_workers=-1, verbosity=logging.INFO):
     # Options | Paths
