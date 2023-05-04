@@ -8,6 +8,7 @@ from math import ceil
 import time
 import logging
 
+
 TEST = False
 if TEST:
     annotation_type = 'tableparse'
@@ -92,7 +93,7 @@ def __visualise(image, annotations, min_width):
 
 
 # Functions
-def visualise_annotation(path_images, path_labels, path_output, annotation_type, classMap=None,
+def visualise_annotation(path_images, path_labels, path_output, annotation_type:str('tabledetect'|'tableparse'), classMap=None,
                          split_annotation_types=None, min_width=800,
                          n_workers=-1, verbosity=logging.INFO):
     # Options | Paths
@@ -123,7 +124,10 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type,
         img = Image.open(imagePath).convert('RGB')
         filename = os.path.splitext(os.path.basename(imagePath))[0]
         imageExtension = os.path.splitext(os.path.basename(imagePath))[-1]
-        annotations = __annotation_to_pilBox(sourcePath=path_labels / filename, labelFormat=labelFormat, targetImage=img, classMap=classMap, colorMap=colorMap)
+        try:
+            annotations = __annotation_to_pilBox(sourcePath=path_labels / filename, labelFormat=labelFormat, targetImage=img, classMap=classMap, colorMap=colorMap)
+        except FileNotFoundError:
+            annotations = []
         if annotations:
             if split_annotation_types:
                 for annotationType in colorMap:        # annotationType = list(colorMap.keys())[1]
