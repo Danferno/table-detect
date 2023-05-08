@@ -1,5 +1,6 @@
 # flit install --python "C:\virtualenvs\testpackages-venv\Scripts\python.exe"
 # flit install --python "C:\virtualenvs\datatog-venv\Scripts\python.exe"
+# flit install --python "C:\virtualenvs\msft-tatr-venv\Scripts\python.exe"
 # flit publish 
 [distutils]
 index-servers = ['pypi', 'testpypi']
@@ -38,7 +39,7 @@ dependencies = [
     'seaborn>=0.11.0',
     'scikit-learn>=1.2.1',
     'Cython>=0.29.33',
-    'pycocotools>=2.0.6',
+    #'pycocotools>=2.0.6',
     'editdistance>=0.6.2',
     'scikit-image>=0.20.0',
     'gputil', 'deskew','pymupdf', 'lxml'
@@ -54,3 +55,6 @@ dev = [
 parallel = [
     "joblib"
 ]
+
+[tool.flit.sdist]
+exclude=["yolov7-main", "resources/tablestructure.pth"]
