@@ -12,6 +12,7 @@ from PIL import Image, ImageOps
 import numpy as np
 from deskew import determine_skew
 import json
+from lxml import etree
 
 # Logging
 import logging
@@ -165,6 +166,18 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_output=PATH_OUT_PARSE,
         if save_bboxes:
             with open(path_output / f'{filename}.json', 'w') as file:
                 json.dump(extractedTable['objects'], file)
+            root = etree.Element('annotation')
+            for object in extractedTable['objects']:        # object = extractedTable['objects'][0]
+                bbox = object['bbox']
+                xml_obj = etree.SubElement(root, 'object')
+                xml_bbox = etree.SubElement(xml_obj, 'bndbox')
+                xml_xmin = etree.SubElement(xml_bbox, 'xmin'); xml_xmin.text = str(bbox[0])
+                xml_ymin = etree.SubElement(xml_bbox, 'xmin'); xml_ymin.text = str(bbox[1])
+                xml_xmax = etree.SubElement(xml_bbox, 'xmin'); xml_xmax.text = str(bbox[2])
+                xml_ymax = etree.SubElement(xml_bbox, 'xmin'); xml_ymax.text = str(bbox[3])
+            tree = etree.ElementTree(root)
+            tree.write(path_output / f'{filename}.xml', pretty_print=False, xml_declaration=False, encoding="utf-8") 
+            
         if save_visual_output:
             for key, val in extractedTable.items():
                 output_result(key, val, args=args, img=image, img_file=dirEntry.name, img_format=image_format)
