@@ -7,8 +7,13 @@ from lxml import etree
 from math import ceil
 import time
 import logging
-from typing import Literal
+from typing import Literal, TypedDict
 
+class AnnotationFormat(TypedDict):
+    labelFormat: Literal['voc', 'yolo']
+    labels: list
+    classMap: dict
+    split_annotation_types: bool
 
 TEST = False
 if TEST:
@@ -94,7 +99,7 @@ def __visualise(image, annotations, min_width):
 
 
 # Functions
-def visualise_annotation(path_images, path_labels, path_output, annotation_type:Literal['tabledetect', 'tableparse'], classMap=None,
+def visualise_annotation(path_images, path_labels, path_output, annotation_type:Literal['tabledetect', 'tableparse', None], annotation_format:AnnotationFormat={},
                          split_annotation_types=None, min_width=800,
                          n_workers=-1, verbosity=logging.INFO):
     # Options | Paths
@@ -116,6 +121,14 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
         labels = ['table', 'table column','table row', 'table column header', 'table projected row header', 'table spanning cell']
         classMap = None
         split_annotation_types = split_annotation_types or True
+    elif not annotation_type:
+        try:
+            labelFormat = annotation_format['labelFormat']
+            labels = annotation_format['labels']
+            classMap = annotation_format.get('classMap')
+            split_annotation_types = annotation_format.get('split_annotation_types') or False
+        except KeyError:
+            raise KeyError('If -annotation_type- is not specified, please include a -annotation_format- dict.')
     else:
         raise Exception(f'annotation_type {annotation_type} not supported. Currently implemented: tabledetect, tableparse')
     colorMap = {key: colors[i] for i, key in enumerate(labels)} 

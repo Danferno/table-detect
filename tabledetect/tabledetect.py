@@ -172,9 +172,10 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_output=PATH_OUT_PARSE,
                 xml_obj = etree.SubElement(root, 'object')
                 xml_bbox = etree.SubElement(xml_obj, 'bndbox')
                 xml_xmin = etree.SubElement(xml_bbox, 'xmin'); xml_xmin.text = str(bbox[0])
-                xml_ymin = etree.SubElement(xml_bbox, 'xmin'); xml_ymin.text = str(bbox[1])
-                xml_xmax = etree.SubElement(xml_bbox, 'xmin'); xml_xmax.text = str(bbox[2])
-                xml_ymax = etree.SubElement(xml_bbox, 'xmin'); xml_ymax.text = str(bbox[3])
+                xml_ymin = etree.SubElement(xml_bbox, 'ymin'); xml_ymin.text = str(bbox[1])
+                xml_xmax = etree.SubElement(xml_bbox, 'xmax'); xml_xmax.text = str(bbox[2])
+                xml_ymax = etree.SubElement(xml_bbox, 'ymax'); xml_ymax.text = str(bbox[3])
+                label = etree.SubElement(xml_obj, 'name'); label.text = object["label"]
             tree = etree.ElementTree(root)
             tree.write(path_output / f'{filename}.xml', pretty_print=False, xml_declaration=False, encoding="utf-8") 
             

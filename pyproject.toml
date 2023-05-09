@@ -1,6 +1,7 @@
 # flit install --python "C:\virtualenvs\testpackages-venv\Scripts\python.exe"
 # flit install --python "C:\virtualenvs\datatog-venv\Scripts\python.exe"
 # flit install --python "C:\virtualenvs\msft-tatr-venv\Scripts\python.exe"
+# flit install --python "C:\virtualenvs\table-parse-split-venv\Scripts\python.exe"
 # flit publish 
 [distutils]
 index-servers = ['pypi', 'testpypi']
