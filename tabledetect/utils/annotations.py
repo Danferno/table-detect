@@ -82,10 +82,11 @@ def __annotation_to_pilBox(sourcePath:Path, labelFormat, targetImage, classMap, 
 def __visualise(image, annotations, min_width, show_labels, as_area):
     overlay = Image.new('RGBA', image.size, (0,0,0,0))
     annotatedImg = ImageDraw.Draw(overlay, 'RGBA')
+    transparencyValue = 50 if as_area else 180
     for annotation in annotations:      # annotation = annotations[0]
         label = annotation.get('label')
         label_color = annotation.get('outline') or 'black'
-        label_color_transparent = ImageColor.getrgb(annotation['outline']) + (50,)
+        label_color_transparent = ImageColor.getrgb(annotation['outline']) + (transparencyValue,)
 
         label_font = ImageFont.truetype('arial.ttf', size=label['size'])
         label_text = label['text']
@@ -151,7 +152,6 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
         raise Exception(f'annotation_type {annotation_type} not supported. Currently implemented: tabledetect, tableparse')
     
     colorMap = {key: colors[i] for i, key in enumerate(labels)}         # this will cause an error for large label lists
-    print(show_labels)
 
     # Annotation function
     def annotateImage(imagePath):
