@@ -85,7 +85,7 @@ def __visualise(image, annotations, min_width, show_labels, as_area, skip_annota
     for annotation in annotations:      # annotation = annotations[0]
         label = annotation.get('label')
         label_color = annotation.get('outline') or 'black'
-        label_color_outline = ImageColor.getrgb(annotation['outline']) + (180,)
+        label_color_outline = ImageColor.getrgb(annotation['outline']) + (160,)
         label_color_transparent = ImageColor.getrgb(annotation['outline']) + (50,)
 
         label_font = ImageFont.truetype('arial.ttf', size=label['size'])
@@ -102,7 +102,7 @@ def __visualise(image, annotations, min_width, show_labels, as_area, skip_annota
             annotatedImg.text(xy=(label_pos_x, label_pos_y), text=label_text, fill=label_color, font=label_font)
 
         if (as_area is True) or (isinstance(as_area, list) and label_text in as_area):
-            annotatedImg.rectangle(xy=annotation['xy'], fill=label_color_transparent, outline='white', width=annotation['width'])
+            annotatedImg.rectangle(xy=annotation['xy'], fill=label_color_transparent, outline=(180, 180, 180, 50), width=annotation['width'])
         else:
             annotatedImg.rectangle(xy=annotation['xy'], outline=label_color_outline, width=annotation['width'])
 
@@ -142,8 +142,11 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
         labels = ['table', 'table column','table row', 'table column header', 'table projected row header', 'table spanning cell']
         classMap = None
         split_annotation_types = split_annotation_types or False
-        as_area = ['table column header', 'table projected row header', 'table spanning cell']
         skip_annotations = skip_annotations or ['table']
+
+        if not split_annotation_types:
+            as_area = ['table column header', 'table projected row header', 'table spanning cell']
+        
     elif not annotation_type:
         try:
             labelFormat = annotation_format['labelFormat']
@@ -176,6 +179,8 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
         if annotations:
             if split_annotation_types:
                 for annotationType in colorMap:        # annotationType = list(colorMap.keys())[1]
+                    if annotationType in skip_annotations:
+                        continue
                     baseImg = img.copy()
                     relevantAnnotations = list(filter(lambda item: item['label']['text'] == annotationType, annotations))
                     if relevantAnnotations:
@@ -213,7 +218,7 @@ if __name__ == '__main__':
     path_images = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_will"
     path_labels = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\labels_will"
     path_output = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_annotated_will"
-    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1)
+    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1, split_annotation_types=True)
 
             
 
