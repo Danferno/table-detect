@@ -79,14 +79,14 @@ def __annotation_to_pilBox(sourcePath:Path, labelFormat, targetImage, classMap, 
     
     return pilBoxes
 
-def __visualise(image, annotations, min_width, show_labels, as_area):
+def __visualise(image, annotations, min_width, show_labels, as_area, skip_annotations):
     overlay = Image.new('RGBA', image.size, (0,0,0,0))
     annotatedImg = ImageDraw.Draw(overlay, 'RGBA')
-    transparencyValue = 50 if as_area else 180
     for annotation in annotations:      # annotation = annotations[0]
         label = annotation.get('label')
         label_color = annotation.get('outline') or 'black'
-        label_color_transparent = ImageColor.getrgb(annotation['outline']) + (transparencyValue,)
+        label_color_outline = ImageColor.getrgb(annotation['outline']) + (180,)
+        label_color_transparent = ImageColor.getrgb(annotation['outline']) + (50,)
 
         label_font = ImageFont.truetype('arial.ttf', size=label['size'])
         label_text = label['text']
@@ -94,25 +94,29 @@ def __visualise(image, annotations, min_width, show_labels, as_area):
         label_pos_x = (annotation['xy'][0] + annotation['xy'][2] - annotatedImg.textlength(text=label_text, font=label_font))/2
         label_pos_y = (annotation['xy'][1] + annotation['xy'][3] - label['size'])/2
         label_bbox = annotatedImg.textbbox(xy=(label_pos_x, label_pos_y), text=label_text, font=label_font)
+        if label_text in skip_annotations:
+            continue
+
         if show_labels:
             annotatedImg.rectangle(xy=label_bbox, fill=(255, 255, 255, 128))
             annotatedImg.text(xy=(label_pos_x, label_pos_y), text=label_text, fill=label_color, font=label_font)
 
-        if as_area:
-            annotatedImg.rectangle(xy=annotation['xy'], fill=label_color_transparent, width=annotation['width'])
+        if (as_area is True) or (isinstance(as_area, list) and label_text in as_area):
+            annotatedImg.rectangle(xy=annotation['xy'], fill=label_color_transparent, outline='white', width=annotation['width'])
         else:
-            annotatedImg.rectangle(xy=annotation['xy'], outline=label_color_transparent, width=annotation['width'])
+            annotatedImg.rectangle(xy=annotation['xy'], outline=label_color_outline, width=annotation['width'])
 
+    image = Image.alpha_composite(image, overlay).convert('RGB')
     if min_width:
         scale = max(800/image.width, 1)
         image = ImageOps.scale(image=image, factor=scale)
 
-    return Image.alpha_composite(image, overlay).convert('RGB')
+    return image
 
 
 # Functions
-def visualise_annotation(path_images, path_labels, path_output, annotation_type:Literal['tabledetect', 'tableparse']=None, annotation_format:AnnotationFormat={},
-                         split_annotation_types=None, show_labels=True, as_area=False, min_width=800,
+def visualise_annotation(path_images, path_labels, path_output, annotation_type:Literal['tabledetect', 'tableparse', 'tableparse-msft']=None, annotation_format:AnnotationFormat={},
+                         split_annotation_types=None, show_labels=True, as_area=False, skip_annotations=[], min_width=800,
                          n_workers=-1, verbosity=logging.INFO):
     # Options | Paths
     path_images = Path(path_images); path_labels = Path(path_labels); path_output = Path(path_output)
@@ -133,6 +137,13 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
         labels = ['table', 'table column','table row', 'table column header', 'table projected row header', 'table spanning cell']
         classMap = None
         split_annotation_types = split_annotation_types or True
+    elif annotation_type == 'tableparse-msft':
+        labelFormat = 'voc'
+        labels = ['table', 'table column','table row', 'table column header', 'table projected row header', 'table spanning cell']
+        classMap = None
+        split_annotation_types = split_annotation_types or False
+        as_area = ['table column header', 'table projected row header', 'table spanning cell']
+        skip_annotations = skip_annotations or ['table']
     elif not annotation_type:
         try:
             labelFormat = annotation_format['labelFormat']
@@ -168,11 +179,11 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
                     baseImg = img.copy()
                     relevantAnnotations = list(filter(lambda item: item['label']['text'] == annotationType, annotations))
                     if relevantAnnotations:
-                        baseImg = __visualise(image=baseImg, annotations=relevantAnnotations, min_width=min_width, show_labels=show_labels, as_area=as_area)
+                        baseImg = __visualise(image=baseImg, annotations=relevantAnnotations, min_width=min_width, show_labels=show_labels, as_area=as_area, skip_annotations=skip_annotations)
                         name = f'{filename}_{annotationType.replace(" ", "").upper()}{imageExtension}'
                         baseImg.save(path_output / name)
             else:
-                baseImg = __visualise(image=img, annotations=annotations, min_width=min_width, show_labels=show_labels, as_area=as_area)           
+                baseImg = __visualise(image=img, annotations=annotations, min_width=min_width, show_labels=show_labels, as_area=as_area, skip_annotations=skip_annotations)           
                 name = f'{filename}_annotated{imageExtension}'
                 baseImg.save(path_output / name)
             return True
@@ -198,11 +209,11 @@ if __name__ == '__main__':
     # path_images = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images"
     # path_labels = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\labels"
     # path_output = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images_annotated"
-    annotation_type = 'tableparse'
+    annotation_type = 'tableparse-msft'
     path_images = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_will"
     path_labels = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\labels_will"
     path_output = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_annotated_will"
-    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1, as_area=False)
+    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1)
 
             
 
