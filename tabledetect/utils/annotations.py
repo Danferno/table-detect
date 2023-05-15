@@ -26,6 +26,16 @@ if TEST:
     
 
 # Helper functions
+def tryCatchAnnotate(func):
+    def wrapper_tryCatch(imagePath, **kwargs):
+        try:
+            return func(imagePath, **kwargs)
+
+        except ValueError as e:
+            print(f'\nError in {imagePath}')
+            raise e
+    return wrapper_tryCatch
+
 def __guessProperFontsize(x0, x1, y0, y1):
     distance_x = (x1-x0)/2
     width = ceil(distance_x/200)
@@ -79,14 +89,14 @@ def __annotation_to_pilBox(sourcePath:Path, labelFormat, targetImage, classMap, 
     
     return pilBoxes
 
-def __visualise(image, annotations, min_width, show_labels, as_area, skip_annotations):
+def __visualise(image, annotations, min_width, show_labels, as_area, skip_annotations, fill_transparancy, outline_transparancy):
     overlay = Image.new('RGBA', image.size, (0,0,0,0))
     annotatedImg = ImageDraw.Draw(overlay, 'RGBA')
     for annotation in annotations:      # annotation = annotations[0]
         label = annotation.get('label')
         label_color = annotation.get('outline') or 'black'
-        label_color_outline = ImageColor.getrgb(annotation['outline']) + (160,)
-        label_color_transparent = ImageColor.getrgb(annotation['outline']) + (50,)
+        label_color_outline = ImageColor.getrgb(annotation['outline']) + (outline_transparancy,)
+        label_color_transparent = ImageColor.getrgb(annotation['outline']) + (fill_transparancy,)
 
         label_font = ImageFont.truetype('arial.ttf', size=label['size'])
         label_text = label['text']
@@ -102,7 +112,7 @@ def __visualise(image, annotations, min_width, show_labels, as_area, skip_annota
             annotatedImg.text(xy=(label_pos_x, label_pos_y), text=label_text, fill=label_color, font=label_font)
 
         if (as_area is True) or (isinstance(as_area, list) and label_text in as_area):
-            annotatedImg.rectangle(xy=annotation['xy'], fill=label_color_transparent, outline=(180, 180, 180, 50), width=annotation['width'])
+            annotatedImg.rectangle(xy=annotation['xy'], fill=label_color_transparent, outline=label_color_outline, width=annotation['width'])
         else:
             annotatedImg.rectangle(xy=annotation['xy'], outline=label_color_outline, width=annotation['width'])
 
@@ -117,6 +127,7 @@ def __visualise(image, annotations, min_width, show_labels, as_area, skip_annota
 # Functions
 def visualise_annotation(path_images, path_labels, path_output, annotation_type:Literal['tabledetect', 'tableparse', 'tableparse-msft']=None, annotation_format:AnnotationFormat={},
                          split_annotation_types=None, show_labels=True, as_area=False, skip_annotations=[], min_width=800,
+                         fill_transparancy=180, outline_transparancy=120,
                          n_workers=-1, verbosity=logging.INFO):
     # Options | Paths
     path_images = Path(path_images); path_labels = Path(path_labels); path_output = Path(path_output)
@@ -143,6 +154,7 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
         classMap = None
         split_annotation_types = split_annotation_types or False
         skip_annotations = skip_annotations or ['table']
+        fill_transparancy = 50
 
         if not split_annotation_types:
             as_area = ['table column header', 'table projected row header', 'table spanning cell']
@@ -168,6 +180,7 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
     colorMap = {key: colors[i] for i, key in enumerate(labels)}         # this will cause an error for large label lists
 
     # Annotation function
+    @tryCatchAnnotate
     def annotateImage(imagePath):
         img = Image.open(imagePath).convert('RGBA')
         filename = os.path.splitext(os.path.basename(imagePath))[0]
@@ -184,11 +197,11 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
                     baseImg = img.copy()
                     relevantAnnotations = list(filter(lambda item: item['label']['text'] == annotationType, annotations))
                     if relevantAnnotations:
-                        baseImg = __visualise(image=baseImg, annotations=relevantAnnotations, min_width=min_width, show_labels=show_labels, as_area=as_area, skip_annotations=skip_annotations)
+                        baseImg = __visualise(image=baseImg, annotations=relevantAnnotations, min_width=min_width, show_labels=show_labels, as_area=as_area, skip_annotations=skip_annotations, fill_transparancy=fill_transparancy, outline_transparancy=outline_transparancy)
                         name = f'{filename}_{annotationType.replace(" ", "").upper()}{imageExtension}'
                         baseImg.save(path_output / name)
             else:
-                baseImg = __visualise(image=img, annotations=annotations, min_width=min_width, show_labels=show_labels, as_area=as_area, skip_annotations=skip_annotations)           
+                baseImg = __visualise(image=img, annotations=annotations, min_width=min_width, show_labels=show_labels, as_area=as_area, skip_annotations=skip_annotations, fill_transparancy=fill_transparancy, outline_transparancy=outline_transparancy)           
                 name = f'{filename}_annotated{imageExtension}'
                 baseImg.save(path_output / name)
             return True
