@@ -16,3 +16,4 @@ tests/temp/
 .venv/
 yolov7-main/
 table-transformer-main/
+sandbox/

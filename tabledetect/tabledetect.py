@@ -2,10 +2,18 @@
 import os, subprocess, sys, shutil
 from pathlib import Path
 from importlib.util import find_spec
-from tabledetect.utils.yolo_to_boundingbox import getBoundingBoxesPerFile
-from tabledetect.utils.boundingbox_to_cropped_image import extractCroppedImages
-from tabledetect.utils.download import downloadRepo, downloadWeights
-from tabledetect.utils.args_classes import StructureArgs
+try:
+    from tabledetect.utils.yolo_to_boundingbox import getBoundingBoxesPerFile
+    from tabledetect.utils.boundingbox_to_cropped_image import extractCroppedImages
+    from tabledetect.utils.download import downloadRepo, downloadWeights
+    from tabledetect.utils.args_classes import StructureArgs
+    from tabledetect.utils.general import ensure_image_format_has_dot, makeDirs
+except ModuleNotFoundError:
+    from utils.yolo_to_boundingbox import getBoundingBoxesPerFile
+    from utils.boundingbox_to_cropped_image import extractCroppedImages
+    from utils.download import downloadRepo, downloadWeights
+    from utils.args_classes import StructureArgs
+    from utils.general import ensure_image_format_has_dot, makeDirs
 
 from tqdm import tqdm
 from PIL import Image, ImageOps
@@ -104,10 +112,37 @@ def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, p
         path_cropped_output = os.path.join(path_output, 'out', 'table-detect', 'cropped')
         extractCroppedImages(bbox_lists_per_file_list=bbox_lists_per_file, outDir=path_cropped_output, imageFormat=image_format, imageDir=path_input)
 
+def detect_table_from_pdf(path_data_pdfs, path_out, 
+                            path_model_file_detect=None, device=None, threshold_confidence=0.5, max_overlap_threshold=0.2, model_detect_image_size=992, trace='--no-trace', verbosity=logging.INFO,
+                            image_format='.png', replace_dirs='warn',
+                            save_annotated_pages=True, save_table_crops=True):
+    # Options
+    # Options | Logging
+    logger.setLevel(verbosity)
+
+    # Options | Image format
+    image_format = ensure_image_format_has_dot(image_format)
+
+    # Options | Paths
+    path_out = Path(path_out)
+    makeDirs(path_out / 'pages' / 'images', replaceDirs=replace_dirs)
+    makeDirs(path_out / 'pages' / 'annotated', replaceDirs=replace_dirs)
+    makeDirs(path_out / 'pages' / 'skew', replaceDirs=replace_dirs)
+    makeDirs(path_out / 'tables' / 'images', replaceDirs=replace_dirs)
+    makeDirs(path_out / 'tables' / 'bboxes', replaceDirs=replace_dirs)
+
+    # PDF to images, saving skew info
+    # Apply detect_table on those images
+
+
+
+
 def parse_table(path_input=PATH_EXAMPLES_PARSE, path_output=PATH_OUT_PARSE,
         save_bboxes=True, save_visual_output=True, deskew=True, padding=20,
         device=None, image_format='.jpg',
         path_weights=PATH_WEIGHTS_PARSE, path_config=PATH_CONFIG_PARSE, verbosity=logging.INFO):
+    ''' Deprecated '''
+
     # Options | Paths
     path_output = Path(path_output)
 
@@ -133,8 +168,7 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_output=PATH_OUT_PARSE,
     os.makedirs(path_output, exist_ok=True)
 
     # options | Image format dot
-    if not image_format.startswith('.'):
-        image_format = f'.{image_format}'
+    image_format = ensure_image_format_has_dot(image_format)
     
     # Import parser
     sys.path.append(PATH_SCRIPT_PARSE)
@@ -185,4 +219,5 @@ def parse_table(path_input=PATH_EXAMPLES_PARSE, path_output=PATH_OUT_PARSE,
 
 
 if __name__ == '__main__':
-    parse_table()
+    PATH_ROOT = Path(r'F:\ml-parsing-project\table-detect\sandbox')
+    detect_table_from_pdf(path_data_pdfs=PATH_ROOT / 'pdfs', path_out=PATH_ROOT / 'output')
