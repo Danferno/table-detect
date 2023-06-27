@@ -72,7 +72,7 @@ def detect_table(path_input=PATH_EXAMPLES_DETECT, path_output=PATH_OUT_DETECT, p
         image_format = f'.{image_format}'
 
     # Options | Save annotated images
-        saveVisualOutput = '' if save_visual_output else '--nosave'
+    saveVisualOutput = '' if save_visual_output else '--nosave'
 
     # Download weights and scripts
     if not os.path.exists(path_weights):
@@ -133,7 +133,7 @@ def detect_table_from_pdf(path_data_pdfs, path_out,
 
     # PDF to images, saving skew info
     # Apply detect_table on those images
-
+    ...
 
 
 
