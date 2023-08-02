@@ -54,7 +54,7 @@ dev = [
     "flit", "pytest", "keyring"
 ]
 parallel = [
-    "joblib"
+    "joblib", "dask[distributed]", "bokeh"
 ]
 
 [tool.flit.sdist]

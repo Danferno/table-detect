@@ -62,7 +62,13 @@ def __yolo_to_pilBox(yoloPath, targetImage, classMap, colorMap):
     pilBoxes = []
     with open(yoloPath, 'r') as yoloFile:
         for annotationLine in yoloFile:         # annotationLine = yoloFile.readline()
-            cat, xc, yc, w, h = [float(string.strip('\n')) for string in annotationLine.split(' ')]
+            cat, xc, yc, w, h, conf = [float(string.strip('\n')) for string in annotationLine.split(' ')]
+            try:
+                cat, xc, yc, w, h = [float(string.strip('\n')) for string in annotationLine.split(' ')]
+                conf = ''
+            except ValueError:
+                cat, xc, yc, w, h, conf = [float(string.strip('\n')) for string in annotationLine.split(' ')]
+                conf = f' {conf:0.2f}'
             
             x0 = (xc - w/2) * targetWidth
             x1 = (xc + w/2) * targetWidth
@@ -73,7 +79,7 @@ def __yolo_to_pilBox(yoloPath, targetImage, classMap, colorMap):
             label = classMap[cat]
 
             pilBoxes.append({'xy': [x0, y0, x1, y1], 'outline': colorMap[label], 'width': width,
-                            'label': {'text': label, 'size': fontsize},})
+                            'label': {'text': f'{label}{conf}', 'size': fontsize},})
     return pilBoxes
 
 def __annotation_to_pilBox(sourcePath:Path, labelFormat, targetImage, classMap, colorMap):
@@ -103,6 +109,7 @@ def __visualise(image, annotations, min_width, show_labels, as_area, skip_annota
 
         label_pos_x = (annotation['xy'][0] + annotation['xy'][2] - annotatedImg.textlength(text=label_text, font=label_font))/2
         label_pos_y = (annotation['xy'][1] + annotation['xy'][3] - label['size'])/2
+        
         label_bbox = annotatedImg.textbbox(xy=(label_pos_x, label_pos_y), text=label_text, font=label_font)
         if label_text in skip_annotations:
             continue
@@ -138,11 +145,16 @@ def visualise_annotation(path_images, path_labels, path_output, annotation_type:
     
     # Options | Annotation type
     colors = ['#FF4136', '#2ECC40', '#0074D9', '#FFDC00', '#B10DC9', '#FF851B', 'black']
-    if annotation_type == 'tabledetect':
+    if annotation_type == 'tabledetect-legacy':
         labelFormat = 'yolo'
         labels = ['table-noborders', 'table-fullborders','table-partialborders']
         classMap = {0: 'table-noborders', 1: 'table-fullborders', 2: 'table-partialborders' }
         split_annotation_types = split_annotation_types or False
+    elif annotation_type == 'tabledetect':
+        labelFormat = 'yolo'
+        labels = ['table']
+        classMap = {0: 'table'}
+        split_annotation_types = False
     elif annotation_type == 'tableparse':
         labelFormat = 'voc'
         labels = ['table', 'table column','table row', 'table column header', 'table projected row header', 'table spanning cell']
@@ -227,11 +239,11 @@ if __name__ == '__main__':
     # path_images = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images"
     # path_labels = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\labels"
     # path_output = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images_annotated"
-    annotation_type = 'tableparse-msft'
-    path_images = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_will"
-    path_labels = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\labels_will"
-    path_output = rf"F:\ml-parsing-project\data\parse_activelearning1_jpg\demos\images_annotated_will"
-    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1, split_annotation_types=True)
+    annotation_type = 'tabledetect'
+    path_images = r"F:\ml-parsing-project\data\detect_activelearning1_png\selected"
+    path_labels = r"F:\ml-parsing-project\data\detect_activelearning1_png\tables_bboxes"
+    path_output = r"F:\ml-parsing-project\data\detect_activelearning1_png\tables_annotated"
+    visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1, as_area=False)
 
             
 

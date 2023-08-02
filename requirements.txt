@@ -28,6 +28,10 @@ deskew
 lxml
 click
 
+# Parallel
+dask[distributed]
+bokeh
+
 # Export --------------------------------------
 # coremltools>=4.1  # CoreML export
 # onnx>=1.9.0  # ONNX export
