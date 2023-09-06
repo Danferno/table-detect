@@ -4,7 +4,7 @@ from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
 from lxml import etree
-import general
+from . import general
 
 # Constants
 TQDM_OPTIONS_FILES = dict(smoothing=0.1, desc='Looping over files')

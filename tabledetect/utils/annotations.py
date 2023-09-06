@@ -62,7 +62,6 @@ def __yolo_to_pilBox(yoloPath, targetImage, classMap, colorMap):
     pilBoxes = []
     with open(yoloPath, 'r') as yoloFile:
         for annotationLine in yoloFile:         # annotationLine = yoloFile.readline()
-            cat, xc, yc, w, h, conf = [float(string.strip('\n')) for string in annotationLine.split(' ')]
             try:
                 cat, xc, yc, w, h = [float(string.strip('\n')) for string in annotationLine.split(' ')]
                 conf = ''
@@ -241,8 +240,8 @@ if __name__ == '__main__':
     # path_output = rf"F:\ml-parsing-project\table-detect\tabledetect\resources\examples_visualise\{annotation_type}\images_annotated"
     annotation_type = 'tabledetect'
     path_images = r"F:\ml-parsing-project\data\detect_activelearning1_png\selected"
-    path_labels = r"F:\ml-parsing-project\data\detect_activelearning1_png\tables_bboxes"
-    path_output = r"F:\ml-parsing-project\data\detect_activelearning1_png\tables_annotated"
+    path_labels = r"F:\ml-parsing-project\data\detect_activelearning1_png\labels_ws"
+    path_output = r"F:\ml-parsing-project\data\detect_activelearning1_png\tables_annotated_ws"
     visualise_annotation(annotation_type=annotation_type, path_images=path_images, path_labels=path_labels, path_output=path_output, n_workers=1, as_area=False)
 
             
